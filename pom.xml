@@ -5,7 +5,7 @@
 	<modules>
 		<module>stat-service</module>
 		<module>stat-service/stat-service-dto</module>
-		<module>stat-service/stat-service-client</module>
+		<module>stat-service/stat-service-server</module>
 	</modules>
 
 	<parent>
