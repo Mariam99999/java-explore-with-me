@@ -27,7 +27,7 @@ public class StatController {
                 ("yyyy-MM-dd HH:mm:ss");
         LocalDateTime decodedStart = LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8.toString()), formatter);
         LocalDateTime decodedEnd = LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8.toString()), formatter);
-
+        System.out.println("ss");
         return statService.getStat(decodedStart, decodedEnd, uris, unique);
     }
 

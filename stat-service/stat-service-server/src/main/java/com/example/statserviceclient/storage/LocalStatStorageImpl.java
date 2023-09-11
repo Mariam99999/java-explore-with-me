@@ -1,7 +1,7 @@
 package com.example.statserviceclient.storage;
 
 import com.example.statserviceclient.mapper.StatMapper;
-import com.example.statservicedto.StatModel;
+import com.example.statserviceclient.model.StatModel;
 import com.example.statservicedto.dto.StatDtoCreate;
 import com.example.statservicedto.dto.StatDtoGet;
 import lombok.RequiredArgsConstructor;
