@@ -1,10 +1,31 @@
 package com.example.statserviceclient.controller;
 
 import com.example.statserviceclient.client.BaseClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.ClientHttpRequestFactorySupplier;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import java.net.http.HttpClient;
+import java.util.Map;
+
+@Service
 public class StatClient extends BaseClient {
-    public StatClient(RestTemplate rest) {
-        super(rest);
+
+    public StatClient() {
+        super(new RestTemplateBuilder()
+                .uriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:8080"))
+                .requestFactory(new ClientHttpRequestFactorySupplier())
+                .build());
+    }
+
+    public ResponseEntity<Object> getStats(String path, Map<String, Object> parameters) {
+        return get(path, parameters);
     }
 }
