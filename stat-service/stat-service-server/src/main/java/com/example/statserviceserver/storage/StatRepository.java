@@ -37,4 +37,5 @@ public interface StatRepository extends JpaRepository<StatModel, Long> {
             "group by sm.app, sm.uri " +
             "order by count(sm.id) desc")
     List<StatDtoGet> findByUniqAndDate(LocalDateTime start, LocalDateTime end);
+
 }
