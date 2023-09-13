@@ -1,7 +1,6 @@
 package com.example.statserviceclient.controller;
 
 import com.example.statservicedto.StatDtoCreate;
-import com.example.statservicedto.StatDtoGet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +32,12 @@ public class ClientController {
         Map<String, Object> params = new HashMap<>();
         params.put("start", start);
         params.put("end", end);
-        params.put("uris",uris == null ? null : String.join(",", uris));
-        params.put("unique",unique);
+        params.put("uris", uris == null ? null : String.join(",", uris));
+        params.put("unique", unique);
 
         return statClient.getStats("/stats?start={start}&end={end}&uris={uris}&unique={unique}", params);
     }
+
     @PostMapping("/hit")
     @ResponseStatus(value = HttpStatus.CREATED)
     void addStat(@RequestBody @Validated StatDtoCreate statDtoCreate) {

@@ -17,15 +17,18 @@ import java.util.List;
 public class StatService {
     private final StatRepository statRepository;
     private final StatMapper statMapper;
-    public List<StatDtoGet> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique){
-        if((uris == null || uris.isEmpty()) && (unique == null || !unique)) return statRepository.findByDate(start,end);
-        if (uris == null || uris.isEmpty()) return statRepository.findByUniqAndDate(start,end);
-        if (unique == null || !unique) return statRepository.findByDateAndUri(start,end,uris);
-        return statRepository.findByUniqAndDateAndUri(start,end,uris);
+
+    public List<StatDtoGet> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        if ((uris == null || uris.isEmpty()) && (unique == null || !unique))
+            return statRepository.findByDate(start, end);
+        if (uris == null || uris.isEmpty()) return statRepository.findByUniqAndDate(start, end);
+        if (unique == null || !unique) return statRepository.findByDateAndUri(start, end, uris);
+        return statRepository.findByUniqAndDateAndUri(start, end, uris);
     }
-    public void addStat (StatDtoCreate statDtoCreate)  {
+
+    public void addStat(StatDtoCreate statDtoCreate) {
         try {
-             statRepository.save(statMapper.mapFromDto(statDtoCreate));
+            statRepository.save(statMapper.mapFromDto(statDtoCreate));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

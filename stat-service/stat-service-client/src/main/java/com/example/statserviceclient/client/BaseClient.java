@@ -6,8 +6,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-
-
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +34,9 @@ public class BaseClient {
     protected ResponseEntity<Object> get(String path, Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
+
     protected ResponseEntity<Object> save(String path, StatDtoCreate statDtoCreate) {
-        return makeAndSendRequest(HttpMethod.POST, path, null,statDtoCreate );
+        return makeAndSendRequest(HttpMethod.POST, path, null, statDtoCreate);
     }
 
 

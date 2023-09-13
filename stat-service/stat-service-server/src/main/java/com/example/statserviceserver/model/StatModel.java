@@ -24,6 +24,6 @@ public class StatModel {
     private String uri;
     @Column(nullable = false)
     private String ip;
-    @Column(name = "click_time",nullable = false)
+    @Column(name = "click_time", nullable = false)
     private LocalDateTime timestamp;
 }

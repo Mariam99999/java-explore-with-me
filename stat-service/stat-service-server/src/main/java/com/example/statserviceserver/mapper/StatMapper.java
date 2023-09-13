@@ -12,13 +12,14 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class StatMapper {
-  public StatDtoGet mapToDto (StatModel statModel, Long hits){
-       return new StatDtoGet(statModel.getApp(),statModel.getUri(),hits);
-   }
-  public StatModel mapFromDto (StatDtoCreate statDtoCreate) throws UnsupportedEncodingException {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern
-              ("yyyy-MM-dd HH:mm:ss");
-      LocalDateTime timestamp = LocalDateTime.parse(statDtoCreate.getTimestamp(), formatter);
-       return new StatModel(null,statDtoCreate.getApp(),statDtoCreate.getUri(),statDtoCreate.getIp(),timestamp);
-   }
+    public StatDtoGet mapToDto(StatModel statModel, Long hits) {
+        return new StatDtoGet(statModel.getApp(), statModel.getUri(), hits);
+    }
+
+    public StatModel mapFromDto(StatDtoCreate statDtoCreate) throws UnsupportedEncodingException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern
+                ("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime timestamp = LocalDateTime.parse(statDtoCreate.getTimestamp(), formatter);
+        return new StatModel(null, statDtoCreate.getApp(), statDtoCreate.getUri(), statDtoCreate.getIp(), timestamp);
+    }
 }
