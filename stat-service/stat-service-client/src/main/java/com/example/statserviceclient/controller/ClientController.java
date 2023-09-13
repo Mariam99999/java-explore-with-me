@@ -1,11 +1,12 @@
 package com.example.statserviceclient.controller;
 
+import com.example.statservicedto.StatDtoCreate;
 import com.example.statservicedto.StatDtoGet;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -35,6 +36,12 @@ public class ClientController {
         params.put("uris",uris);
         params.put("unique",unique);
 
-        return statClient.getStats("/stats", params);
+        return statClient.getStats("/stats?start={start}&end={end}&uris={uris}&unique={unique}", params);
+    }
+    @PostMapping("/hit")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    StatDtoCreate addStat(@RequestBody @Validated StatDtoCreate statDtoCreate) {
+        statClient.saveStat("/hit", statDtoCreate);
+        return statDtoCreate;
     }
 }

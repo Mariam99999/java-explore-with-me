@@ -1,5 +1,6 @@
 package com.example.statserviceclient.client;
 
+import com.example.statservicedto.StatDtoCreate;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -34,6 +35,9 @@ public class BaseClient {
 
     protected ResponseEntity<Object> get(String path, Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
+    }
+    protected ResponseEntity<Object> save(String path, StatDtoCreate statDtoCreate) {
+        return makeAndSendRequest(HttpMethod.POST, path, null,statDtoCreate );
     }
 
 
