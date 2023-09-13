@@ -21,9 +21,9 @@ import java.util.Map;
 @Service
 public class StatClient extends BaseClient {
 
-    public StatClient() {
+    public StatClient(@Value("${stat.server.url}") String serverUrl) {
         super(new RestTemplateBuilder()
-                .uriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:8080"))
+                .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .requestFactory(SimpleClientHttpRequestFactory::new)
                 .build());
     }

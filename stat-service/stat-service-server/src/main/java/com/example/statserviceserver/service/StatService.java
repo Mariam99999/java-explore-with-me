@@ -23,10 +23,9 @@ public class StatService {
         if (unique == null || !unique) return statRepository.findByDateAndUri(start,end,uris);
         return statRepository.findByUniqAndDateAndUri(start,end,uris);
     }
-    public StatDtoCreate addStat (StatDtoCreate statDtoCreate)  {
+    public void addStat (StatDtoCreate statDtoCreate)  {
         try {
              statRepository.save(statMapper.mapFromDto(statDtoCreate));
-             return statDtoCreate;
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
