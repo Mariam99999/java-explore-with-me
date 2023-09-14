@@ -5,6 +5,7 @@ import com.example.statservicedto.StatDtoGet;
 import com.example.statserviceserver.service.StatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
@@ -31,7 +32,7 @@ public class StatController {
 
     @PostMapping("/hit")
     @ResponseStatus(value = HttpStatus.CREATED)
-    void addStat(@RequestBody StatDtoCreate statDtoCreate) {
+    void addStat(@RequestBody @Validated StatDtoCreate statDtoCreate) {
         statService.addStat(statDtoCreate);
     }
 

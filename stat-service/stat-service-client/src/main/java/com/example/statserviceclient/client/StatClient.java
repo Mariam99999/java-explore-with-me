@@ -1,6 +1,5 @@
-package com.example.statserviceclient.controller;
+package com.example.statserviceclient.client;
 
-import com.example.statserviceclient.client.BaseClient;
 import com.example.statservicedto.StatDtoCreate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -11,7 +10,6 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.util.Map;
 
-@Service
 public class StatClient extends BaseClient {
 
     public StatClient(@Value("${stat.server.url}") String serverUrl) {
