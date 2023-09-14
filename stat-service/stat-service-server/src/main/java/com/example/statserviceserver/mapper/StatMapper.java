@@ -17,8 +17,7 @@ public class StatMapper {
     }
 
     public StatModel mapFromDto(StatDtoCreate statDtoCreate) throws UnsupportedEncodingException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern
-                ("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime timestamp = LocalDateTime.parse(statDtoCreate.getTimestamp(), formatter);
         return new StatModel(null, statDtoCreate.getApp(), statDtoCreate.getUri(), statDtoCreate.getIp(), timestamp);
     }
