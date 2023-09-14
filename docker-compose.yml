@@ -1,5 +1,16 @@
 version: '3.1'
 services:
+  ewm-service:
+    build: ./stat-service/stat-service-client
+    image: client-image
+    container_name: clientContainer
+    ports:
+      - "9090:9090"
+    depends_on:
+      - stats-server
+    environment:
+      - STAT_SERVER_URL=http://stats-server:8080
+
   stats-server:
     build: ./stat-service/stat-service-server
     image: server-image
@@ -13,7 +24,6 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=password
 
-
   stats-db:
     image: postgres:14-alpine
     container_name: dbContainer
@@ -24,13 +34,3 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
 
-  ewm-service:
-    build: ./stat-service/stat-service-client
-    image: client-image
-    container_name: clientContainer
-    ports:
-      - "9090:9090"
-    depends_on:
-      - stats-server
-    environment:
-      - STAT_SERVER_URL=http://stats-server:8080
