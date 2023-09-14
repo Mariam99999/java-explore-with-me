@@ -7,7 +7,6 @@ import com.example.statserviceserver.storage.StatRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,12 +26,7 @@ public class StatService {
     }
 
     public void addStat(StatDtoCreate statDtoCreate) {
-        try {
-            statRepository.save(statMapper.mapFromDto(statDtoCreate));
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-
+        statRepository.save(statMapper.mapFromDto(statDtoCreate));
     }
 
 }
