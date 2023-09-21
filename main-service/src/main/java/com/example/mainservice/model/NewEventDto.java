@@ -23,7 +23,7 @@ public class NewEventDto {
     private Long category;
     @NotBlank
     private String description;
-    @NotBlank
+    @NotNull
     private LocalDateTime eventDate;
     @NotNull
     private Location location;
