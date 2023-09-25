@@ -2,8 +2,10 @@ package com.example.mainservice.model;
 
 
 import com.example.mainservice.enums.StatEnum;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.Type;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 @Entity
 @Builder
 @Table(name = "events")
+
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +28,7 @@ public class Event {
     private Category category;
     @Column(name = "confirmed_requests" )
     private Long confirmedRequests;
-    @Column(name = "created_on" )
+    @Column(name = "created_on")
     private LocalDateTime createdOn;
     private String description;
     @Column(name = "event_date" )

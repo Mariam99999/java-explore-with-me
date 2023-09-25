@@ -19,17 +19,16 @@ public class EventFullDto {
     private String annotation;
     private Category category;
     private Long confirmedRequests;
-    private LocalDateTime createdOn;
+    private String createdOn;
     private String description;
-    private LocalDateTime eventDate;
+    private String eventDate;
     private UserShortDto initiator;
     private Location location;
     private Boolean paid;
     private Integer participantLimit;
-    private LocalDateTime publishedOn;
+    private String publishedOn;
     private Boolean requestModeration;
     private StatEnum state;
     private String title;
     private Integer views;
-
 }

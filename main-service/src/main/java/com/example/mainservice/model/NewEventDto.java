@@ -24,7 +24,7 @@ public class NewEventDto {
     @NotBlank
     private String description;
     @NotNull
-    private LocalDateTime eventDate;
+    private String eventDate;
     @NotNull
     private Location location;
     private Boolean paid;
