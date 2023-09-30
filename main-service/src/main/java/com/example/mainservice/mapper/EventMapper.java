@@ -14,7 +14,7 @@ import static com.example.mainservice.utils.EventUtils.DATE_TME_FORMATTER;
 @Component
 public class EventMapper {
     private final UserMapper userMapper;
-    public EventFullDto mapToDto(Event event){
+    public EventFullDto mapToDto(Event event, Long requests, Integer views){
        return  EventFullDto.builder()
                .id(event.getId())
                .title(event.getTitle())
@@ -22,7 +22,7 @@ public class EventMapper {
                .annotation(event.getAnnotation())
                .category(event.getCategory())
                .eventDate(event.getEventDate().format(DATE_TME_FORMATTER))
-               .confirmedRequests(event.getConfirmedRequests())
+               .confirmedRequests(requests)
                .createdOn(event.getCreatedOn().format(DATE_TME_FORMATTER))
                .description(event.getDescription())
                .initiator(userMapper.mapToShortDto(event.getInitiator()))
@@ -31,7 +31,7 @@ public class EventMapper {
                .publishedOn(event.getPublishedOn().format(DATE_TME_FORMATTER))
                .requestModeration(event.getRequestModeration())
                .state(event.getState())
-               .views(event.getViews())
+               .views(views)
                .build();
     }
     public Event mapToEvent(User user,Category category,LocalDateTime createdOn, NewEventDto newEventDto){
@@ -55,9 +55,9 @@ public class EventMapper {
                 .build();
         return event;
     }
-    public EventShortDto mapToShortDto(Event event){
+    public EventShortDto mapToShortDto(Event event, Long requests, Integer views){
         return new EventShortDto(event.getId(),event.getAnnotation(),event.getCategory(),
-                event.getConfirmedRequests(),event.getEventDate().format(DATE_TME_FORMATTER),
-                userMapper.mapToShortDto(event.getInitiator()),event.getPaid(), event.getTitle(), event.getViews());
+                requests,event.getEventDate().format(DATE_TME_FORMATTER),
+                userMapper.mapToShortDto(event.getInitiator()),event.getPaid(), event.getTitle(), views);
     }
 }

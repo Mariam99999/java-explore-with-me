@@ -1,16 +1,19 @@
 package com.example.statserviceclient.client;
 
 import com.example.statservicedto.StatDtoCreate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.util.Map;
-
+@Component
 public class StatClient extends BaseClient {
 
+    @Autowired
     public StatClient(@Value("${stat.server.url}") String serverUrl) {
         super(new RestTemplateBuilder()
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))

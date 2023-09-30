@@ -1,11 +1,11 @@
 package com.example.mainservice.controller;
 
 import com.example.mainservice.model.EventFullDto;
-import com.example.mainservice.model.UpdateEventAdminRequest;
 import com.example.mainservice.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -15,8 +15,9 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping("/{eventId}")
-    public EventFullDto getEventById(@PathVariable Long eventId) {
-        return eventService.getEventById(eventId);
+    public EventFullDto getEventById(@PathVariable Long eventId, HttpServletRequest httpServletRequest) {
+
+        return eventService.getEventById(eventId, httpServletRequest);
     }
 
     @GetMapping
@@ -28,8 +29,9 @@ public class EventController {
                                         @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                         @RequestParam(required = false) String sort,
                                         @RequestParam(defaultValue = "0") int from,
-                                        @RequestParam(defaultValue = "10") int size) {
-        return eventService.getEventsByFilter(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+                                        @RequestParam(defaultValue = "10") int size,
+                                        HttpServletRequest httpServletRequest) {
+        return eventService.getEventsByFilter(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, httpServletRequest);
     }
 }
 

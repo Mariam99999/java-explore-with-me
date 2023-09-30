@@ -9,13 +9,14 @@ import com.example.mainservice.storage.EventRepository;
 import com.example.mainservice.storage.UserRepository;
 import com.example.mainservice.utils.EventUtils;
 import com.example.statserviceclient.client.StatClient;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import com.example.statservicedto.StatDtoCreate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 import static com.example.mainservice.utils.EventUtils.DATE_TME_FORMATTER;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
@@ -40,7 +41,7 @@ public class EventService {
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
         Category category = categoryRepository.findById(newEventDto.getCategory()).orElseThrow(NotFoundException::new);
         Event event = eventRepository.save(eventMapper.mapToEvent(user, category, lf, newEventDto));
-        return eventMapper.mapToDto(event);
+        return eventMapper.mapToDto(event,0L,0);
     }
 
     public List<EventFullDto> getEventByInitiatorId(Long id, int from, int size) {
@@ -90,8 +91,9 @@ public class EventService {
     public List<EventFullDto> getEventsByFilter(String text, List<Long> categories,
                                                 Boolean paid, String rangeStart,
                                                 String rangeEnd, Boolean onlyAvailable,
-                                                String sort, int from, int size) {
-
+                                                String sort, int from, int size,
+                                                HttpServletRequest httpServletRequest) {
+        saveState(httpServletRequest);
         Pageable pageable = PageRequest.of(from / size, size,
                 Sort.by(sort == null || sort.equals("EVENT_DATE") ? "createdOn" : "views").descending());
         return eventRepository.findByFilters(text, categories, paid,
@@ -102,8 +104,13 @@ public class EventService {
                 .map(eventMapper::mapToDto).collect(Collectors.toList());
     }
 
-    public EventFullDto getEventById(Long eventId) {
-
+    public EventFullDto getEventById(Long eventId, HttpServletRequest httpServletRequest) {
+        saveState(httpServletRequest);
         return eventMapper.mapToDto(eventRepository.findById(eventId).orElseThrow(NotFoundException::new));
+    }
+
+    private void saveState(HttpServletRequest httpServletRequest) {
+        statClient.saveStat("/hit", new StatDtoCreate("main-service",
+                httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr(), LocalDateTime.now()));
     }
 }
