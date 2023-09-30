@@ -5,7 +5,6 @@ import com.example.mainservice.model.Event;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,12 +20,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND (:states is null or e.state in :states) " +
             "AND (:categories is null or e.category.id in :categories) " +
             "AND  e.createdOn BETWEEN :rangeStart and :rangeEnd")
-    List<Event> findByAdmin(@Param("users") List<Long> users, @Param("states") List<StatEnum> states, List<Long> categories,
+    List<Event> findByAdmin(List<Long> users, List<StatEnum> states, List<Long> categories,
                             LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
 
     @Query("select e from Event as e " +
-            "where (:text is null or e.annotation like lower(concat('%', :text,'%')) " +
-            "OR e.description like lower(concat('%', :text,'%'))) " +
+            "where e.state = 'PUBLISHED'" +
+            "AND (:text is null or lower(e.annotation) like lower(concat('%', :text,'%')) " +
+            "OR lower(e.description) like lower(concat('%', :text,'%'))) " +
             "AND (:categories is null or e.category.id in :categories) " +
             "AND (:paid is null or e.paid = :paid) " +
             "AND  e.createdOn BETWEEN :rangeStart and :rangeEnd " +

@@ -8,12 +8,13 @@ import com.example.mainservice.storage.CategoryRepository;
 import com.example.mainservice.storage.EventRepository;
 import com.example.mainservice.storage.UserRepository;
 import com.example.mainservice.utils.EventUtils;
+import com.example.statserviceclient.client.StatClient;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +30,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
+    private final StatClient statClient;
 
 
     public EventFullDto addEvent(Long userId, NewEventDto newEventDto) {
@@ -84,14 +86,24 @@ public class EventService {
         }
         return eventMapper.mapToDto(eventRepository.save(EventUtils.update(event, updateEventUserRequest, category)));
     }
-    public List<EventFullDto> getEventsByFilter( String text, List<Long> categories,
-                                          Boolean paid, String rangeStart,
-                                          String rangeEnd, Boolean onlyAvailable,
-                                          String sort, int from, int size){
+
+    public List<EventFullDto> getEventsByFilter(String text, List<Long> categories,
+                                                Boolean paid, String rangeStart,
+                                                String rangeEnd, Boolean onlyAvailable,
+                                                String sort, int from, int size) {
+
         Pageable pageable = PageRequest.of(from / size, size,
-                Sort.by(sort.equals("EVENT_DATE") ? "createdOn" : "views").descending());
-       return eventRepository.findByFilters(text,categories,paid,LocalDateTime.parse(rangeStart, DATE_TME_FORMATTER),
-                LocalDateTime.parse(rangeEnd, DATE_TME_FORMATTER),onlyAvailable,pageable).stream()
-               .map(eventMapper::mapToDto).collect(Collectors.toList());
+                Sort.by(sort == null || sort.equals("EVENT_DATE") ? "createdOn" : "views").descending());
+        return eventRepository.findByFilters(text, categories, paid,
+                        rangeStart == null ? LocalDateTime.now().plusSeconds(1) :
+                                LocalDateTime.parse(rangeStart, DATE_TME_FORMATTER),
+                        rangeEnd == null ? LocalDateTime.now().plusYears(100) :
+                                LocalDateTime.parse(rangeEnd, DATE_TME_FORMATTER), onlyAvailable, pageable).stream()
+                .map(eventMapper::mapToDto).collect(Collectors.toList());
+    }
+
+    public EventFullDto getEventById(Long eventId) {
+
+        return eventMapper.mapToDto(eventRepository.findById(eventId).orElseThrow(NotFoundException::new));
     }
 }

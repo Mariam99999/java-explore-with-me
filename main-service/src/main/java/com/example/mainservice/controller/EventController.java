@@ -15,9 +15,8 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping("/{eventId}")
-    public EventFullDto getEventById(@PathVariable Long eventId,
-                                     @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
-        return eventService.updateEventById(eventId, updateEventAdminRequest);
+    public EventFullDto getEventById(@PathVariable Long eventId) {
+        return eventService.getEventById(eventId);
     }
 
     @GetMapping
@@ -33,3 +32,4 @@ public class EventController {
         return eventService.getEventsByFilter(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
     }
 }
+
