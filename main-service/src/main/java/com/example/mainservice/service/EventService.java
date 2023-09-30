@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,32 +54,44 @@ public class EventService {
 
     public EventFullDto updateEventByIdAndInitiatorId(Long evenId, Long userId, UpdateEventUserRequest updateEventUserRequest) {
         Event event = eventRepository.findByIdAndInitiatorId(evenId, userId).orElseThrow(NotFoundException::new);
-        return updateEvent(event,updateEventUserRequest);
+        return updateEvent(event, updateEventUserRequest);
     }
-    public EventFullDto updateEventById(Long eventId,UpdateEventAdminRequest updateEventAdminRequest){
 
-        Event event = eventRepository.findById(eventId).orElseThrow(NotFoundException :: new);
-        return updateEvent(event,updateEventAdminRequest);
+    public EventFullDto updateEventById(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
+
+        Event event = eventRepository.findById(eventId).orElseThrow(NotFoundException::new);
+        return updateEvent(event, updateEventAdminRequest);
     }
-    public List<EventFullDto> getEventsByAmin(List<Long> users,  List<String> states, List<Long> categories,
-                                              String rangeStart, String rangeEnd, int from, int size){
+
+    public List<EventFullDto> getEventsByAmin(List<Long> users, List<String> states, List<Long> categories,
+                                              String rangeStart, String rangeEnd, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("createdOn").descending());
         List<StatEnum> statEnums = states.stream().map(StatEnum::valueOf)
                 .collect(Collectors.toList());
-        return eventRepository.findByAdmin(users,statEnums,categories,
-                        LocalDateTime.parse(rangeStart,DATE_TME_FORMATTER),
-                        LocalDateTime.parse(rangeEnd,DATE_TME_FORMATTER),pageable)
+        return eventRepository.findByAdmin(users, statEnums, categories,
+                        rangeStart == null ? LocalDateTime.now().minusYears(100) :
+                                LocalDateTime.parse(rangeStart, DATE_TME_FORMATTER),
+                        rangeEnd == null ? LocalDateTime.now().plusYears(100) :
+                                LocalDateTime.parse(rangeEnd, DATE_TME_FORMATTER), pageable)
                 .stream().map(eventMapper::mapToDto).collect(Collectors.toList());
 
     }
-    private EventFullDto updateEvent(Event event,UpdateEventUserRequest updateEventUserRequest){
+
+    private EventFullDto updateEvent(Event event, UpdateEventUserRequest updateEventUserRequest) {
         Category category = null;
         if (updateEventUserRequest.getCategory() != null) {
             category = categoryRepository.findById(updateEventUserRequest.getCategory()).orElseThrow(NotFoundException::new);
         }
-        return eventMapper.mapToDto(eventRepository.save(EventUtils.update(event,updateEventUserRequest,category)));
+        return eventMapper.mapToDto(eventRepository.save(EventUtils.update(event, updateEventUserRequest, category)));
     }
-
-
-
+    public List<EventFullDto> getEventsByFilter( String text, List<Long> categories,
+                                          Boolean paid, String rangeStart,
+                                          String rangeEnd, Boolean onlyAvailable,
+                                          String sort, int from, int size){
+        Pageable pageable = PageRequest.of(from / size, size,
+                Sort.by(sort.equals("EVENT_DATE") ? "createdOn" : "views").descending());
+       return eventRepository.findByFilters(text,categories,paid,LocalDateTime.parse(rangeStart, DATE_TME_FORMATTER),
+                LocalDateTime.parse(rangeEnd, DATE_TME_FORMATTER),onlyAvailable,pageable).stream()
+               .map(eventMapper::mapToDto).collect(Collectors.toList());
+    }
 }

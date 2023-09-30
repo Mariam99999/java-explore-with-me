@@ -1,16 +1,14 @@
 package com.example.mainservice.controller;
 
-import com.example.mainservice.model.EventFullDto;
-import com.example.mainservice.model.NewEventDto;
-import com.example.mainservice.model.UpdateEventUserRequest;
+import com.example.mainservice.model.*;
 import com.example.mainservice.service.EventService;
+import com.example.mainservice.service.ParticipationRequestService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.net.PortUnreachableException;
 import java.util.List;
 
 @RestController
@@ -18,6 +16,7 @@ import java.util.List;
 @RequestMapping("/users/{userId}/events")
 public class PrivateEventController {
     private final EventService eventService;
+    private final ParticipationRequestService participationRequestService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -42,5 +41,16 @@ public class PrivateEventController {
                                       @RequestBody UpdateEventUserRequest updateEventUserRequest){
         return eventService.updateEventByIdAndInitiatorId(eventId,userId,updateEventUserRequest);
     }
+    @GetMapping("/{eventId}/requests")
+   public List<ParticipationRequestDto> getParticipationRequestByEventIdAndInitiatorId(@PathVariable Long eventId,
+                                                                                 @PathVariable Long userId){
+        return participationRequestService.getParticipationRequestByEventIdAndInitiatorId(eventId,userId);
+    }
+    @PatchMapping("/{eventId}/requests")
+    public EventRequestStatusUpdateResult updateStatus(@PathVariable Long userId,@PathVariable Long eventId,
+                                                       @RequestBody @Valid EventRequestStatusUpdateRequest e){
+        return participationRequestService.updateStatus(userId,eventId,e);
+    }
+
 
 }

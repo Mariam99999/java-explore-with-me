@@ -40,4 +40,16 @@ CREATE TABLE IF NOT EXISTS participation_requests
     user_id  bigint  not null,
     status   varchar not null
 );
+CREATE TABLE IF NOT EXISTS compilations
+(
+    id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    pinned int     not null,
+    title  varchar not null
+);
+CREATE TABLE IF NOT EXISTS compilation_events
+(
+    compilation_id BIGINT not null references compilations(id),
+    event_id       BIGINT not null references events(id),
+    CONSTRAINT pk PRIMARY KEY (compilation_id, event_id)
+);
 

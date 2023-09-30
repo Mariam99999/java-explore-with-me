@@ -1,5 +1,6 @@
 package com.example.mainservice.mapper;
 
+import com.example.mainservice.enums.RequestStatus;
 import com.example.mainservice.enums.StatEnum;
 import com.example.mainservice.model.Event;
 import com.example.mainservice.model.ParticipationRequest;
@@ -12,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class ParticipationRequestMapper {
     public ParticipationRequest mapToParticipationRequest (User user, Event event){
-        return new ParticipationRequest(null, LocalDateTime.now(),event,user, StatEnum.PENDING);
+        return new ParticipationRequest(null, LocalDateTime.now(),event,user, RequestStatus.PENDING);
     }
     public  ParticipationRequestDto mapToParticipationRequestDto (ParticipationRequest participationRequest){
         return new ParticipationRequestDto(participationRequest.getId(),

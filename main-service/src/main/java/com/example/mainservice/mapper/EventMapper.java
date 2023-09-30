@@ -55,4 +55,9 @@ public class EventMapper {
                 .build();
         return event;
     }
+    public EventShortDto mapToShortDto(Event event){
+        return new EventShortDto(event.getId(),event.getAnnotation(),event.getCategory(),
+                event.getConfirmedRequests(),event.getEventDate().format(DATE_TME_FORMATTER),
+                userMapper.mapToShortDto(event.getInitiator()),event.getPaid(), event.getTitle(), event.getViews());
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.mainservice.model;
 
+import com.example.mainservice.enums.RequestStatus;
 import com.example.mainservice.enums.StatEnum;
 import lombok.*;
 
@@ -24,5 +25,6 @@ public class ParticipationRequest {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User requester;
-    private StatEnum status;
+    @Enumerated(EnumType.STRING)
+    private RequestStatus status;
 }

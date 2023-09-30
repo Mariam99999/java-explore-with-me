@@ -24,5 +24,12 @@ public class ParticipationRequestController {
     ParticipationRequestDto addParticipationRequest(@PathVariable Long userId,@RequestParam Long eventId){
         return participationRequestService.addParticipationRequest(userId,eventId);
     }
-
+    @GetMapping()
+    List<ParticipationRequestDto> getParticipationRequest(@PathVariable Long userId){
+        return participationRequestService.getRequestByRequesterId(userId);
+    }
+    @PatchMapping("/{requestId}/cancel")
+    ParticipationRequestDto cancelRequest(@PathVariable Long userId,@PathVariable Long requestId){
+        return participationRequestService.cancelRequest(userId,requestId);
+    }
 }
