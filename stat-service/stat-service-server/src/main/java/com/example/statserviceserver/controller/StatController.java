@@ -28,7 +28,6 @@ public class StatController {
     @PostMapping("/hit")
     @ResponseStatus(value = HttpStatus.CREATED)
     void addStat(@RequestBody @Valid StatDtoCreate statDtoCreate) {
-
         statService.addStat(statDtoCreate);
     }
 }

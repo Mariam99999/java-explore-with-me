@@ -17,9 +17,11 @@ public class CompilationMapper {
                 newCompilationDto.getTitle());
     }
     public CompilationDto toCompilationDto (Compilation compilation){
-        return new CompilationDto(
-                compilation.getEvents().stream().map(eventMapper::mapToShortDto).collect(Collectors.toList()),
-                compilation.getId(), compilation.getPinned(),compilation.getTitle());
+//        return new CompilationDto(
+//                compilation.getEvents().stream().map(eventMapper::mapToShortDto).collect(Collectors.toList()),
+//                compilation.getId(), compilation.getPinned(),compilation.getTitle());
+        //todo
+        return null;
     }
     public Compilation toCompilationFromUpdateDto(Compilation compilation, UpdateCompilationRequest updateDto,
                                                   List<Event> events){
