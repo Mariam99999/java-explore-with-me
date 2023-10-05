@@ -18,8 +18,9 @@ public class CategoryController {
                                         @RequestParam(defaultValue = "10") int size) {
         return categoryService.getCategories(from / size, size);
     }
+
     @GetMapping("/{catId}")
-    public Category getCategoryById(@PathVariable Long catId){
+    public Category getCategoryById(@PathVariable Long catId) {
         return categoryService.getCategoryById(catId);
     }
 

@@ -1,14 +1,14 @@
 package com.example.mainservice.service;
 
+import com.example.mainservice.exception.ConflictException;
 import com.example.mainservice.mapper.UserMapper;
 import com.example.mainservice.model.NewUserRequest;
-import com.example.mainservice.model.User;
 import com.example.mainservice.model.UserDto;
 import com.example.mainservice.storage.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,13 +21,19 @@ public class UserService {
     private final UserMapper userMapper;
 
     public UserDto addUser(NewUserRequest newUserRequest) {
-        return userMapper.mapFromUser(userRepository.save(userMapper.mapToUser(newUserRequest)));
+        try {
+            return userMapper.mapFromUser(userRepository.save(userMapper.mapToUser(newUserRequest)));
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException();
+        }
     }
 
     public List<UserDto> getUser(List<Long> ids, int from, int size) {
         Pageable pageableWithSort = PageRequest.of(from, size);
-        return userRepository
-                .findAllByIdIn(ids, pageableWithSort)
+        if (ids == null || ids.isEmpty()) return userRepository.findAll(pageableWithSort).getContent().stream()
+                .map(userMapper::mapFromUser).collect(Collectors.toList());
+        return userRepository.
+                findAllByIdIn(ids, pageableWithSort)
                 .stream().map(userMapper::mapFromUser)
                 .collect(Collectors.toList());
     }

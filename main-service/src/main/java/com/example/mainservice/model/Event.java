@@ -2,10 +2,8 @@ package com.example.mainservice.model;
 
 
 import com.example.mainservice.enums.StatEnum;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.Type;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,12 +24,12 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-    @Column(name = "confirmed_requests" )
+    @Column(name = "confirmed_requests")
     private Long confirmedRequests;
     @Column(name = "created_on")
     private LocalDateTime createdOn;
     private String description;
-    @Column(name = "event_date" )
+    @Column(name = "event_date")
     private LocalDateTime eventDate;
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -51,5 +49,5 @@ public class Event {
     @Column(name = "state_enum")
     private StatEnum state;
     private String title;
-    private Integer views ;
+    private Long views;
 }

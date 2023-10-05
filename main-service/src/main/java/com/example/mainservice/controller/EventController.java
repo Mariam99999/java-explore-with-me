@@ -2,6 +2,7 @@ package com.example.mainservice.controller;
 
 import com.example.mainservice.model.EventFullDto;
 import com.example.mainservice.service.EventService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,7 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping("/{eventId}")
-    public EventFullDto getEventById(@PathVariable Long eventId, HttpServletRequest httpServletRequest) {
+    public EventFullDto getEventById(@PathVariable Long eventId, HttpServletRequest httpServletRequest) throws JsonProcessingException {
 
         return eventService.getEventById(eventId, httpServletRequest);
     }
@@ -30,7 +31,7 @@ public class EventController {
                                         @RequestParam(required = false) String sort,
                                         @RequestParam(defaultValue = "0") int from,
                                         @RequestParam(defaultValue = "10") int size,
-                                        HttpServletRequest httpServletRequest) {
+                                        HttpServletRequest httpServletRequest) throws JsonProcessingException {
         return eventService.getEventsByFilter(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, httpServletRequest);
     }
 }

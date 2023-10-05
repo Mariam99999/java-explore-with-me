@@ -1,7 +1,6 @@
 package com.example.mainservice.model;
 
 import lombok.AllArgsConstructor;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,5 +22,5 @@ public class User {
     private String name;
     @Column(name = "is_admin")
     @Type(type = "org.hibernate.type.NumericBooleanType")
-    private  Boolean isAdmin;
+    private Boolean isAdmin;
 }

@@ -17,18 +17,21 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    List<UserDto> getUsers(@RequestParam List<Long> ids, @RequestParam(defaultValue = "0") int from,
-                     @RequestParam(defaultValue = "10") int size) {
-       return userService.getUser(ids, from / size, size);
+    List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
+                           @RequestParam(defaultValue = "0") int from,
+                           @RequestParam(defaultValue = "10") int size) {
+        return userService.getUser(ids, from / size, size);
     }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserDto addUser(@RequestBody @Valid NewUserRequest newUserRequest){
+    UserDto addUser(@RequestBody @Valid NewUserRequest newUserRequest) {
         return userService.addUser(newUserRequest);
     }
+
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteUser(@PathVariable Long userId ){
+    void deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
     }
 }

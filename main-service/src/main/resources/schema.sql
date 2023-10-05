@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS events
 (
     id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     annotation         varchar                     not null,
-    category_id        bigint                      not null,
+    category_id        bigint                      not null ,
     confirmed_requests bigint                      not null,
     created_on         TIMESTAMP WITHOUT TIME ZONE not null,
     description        varchar                     not null,
@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS events
     request_moderation int                         not null,
     state_enum         varchar                     not null,
     title              varchar                     not null,
-    views              bigint                      not null
+    views              bigint                      not null,
+    CONSTRAINT FK_events_category_id FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE RESTRICT
 );
 CREATE TABLE IF NOT EXISTS participation_requests
 (

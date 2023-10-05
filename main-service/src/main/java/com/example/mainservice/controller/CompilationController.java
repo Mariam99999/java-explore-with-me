@@ -2,6 +2,7 @@ package com.example.mainservice.controller;
 
 import com.example.mainservice.model.CompilationDto;
 import com.example.mainservice.service.CompilationService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +17,12 @@ public class CompilationController {
     @GetMapping()
     public List<CompilationDto> getCompilation(@RequestParam(required = false) Boolean pinned,
                                                @RequestParam(defaultValue = "0") int from,
-                                               @RequestParam(defaultValue = "10") int size){
-        return compilationService.getCompilation(pinned,from,size);
+                                               @RequestParam(defaultValue = "10") int size) {
+        return compilationService.getCompilation(pinned, from, size);
     }
+
     @GetMapping("/{compId}")
-    public CompilationDto getCompilationById(@PathVariable Long compId){
+    public CompilationDto getCompilationById(@PathVariable Long compId) throws JsonProcessingException {
         return compilationService.getCompilationById(compId);
     }
 }

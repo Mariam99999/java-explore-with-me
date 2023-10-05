@@ -7,9 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.awt.print.Pageable;
-import java.time.LocalDateTime;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -30,5 +27,5 @@ public class EventFullDto {
     private Boolean requestModeration;
     private StatEnum state;
     private String title;
-    private Integer views;
+    private Long views;
 }

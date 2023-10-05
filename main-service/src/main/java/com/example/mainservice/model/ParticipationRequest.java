@@ -1,8 +1,10 @@
 package com.example.mainservice.model;
 
 import com.example.mainservice.enums.RequestStatus;
-import com.example.mainservice.enums.StatEnum;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

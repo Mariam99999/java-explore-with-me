@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByInitiatorId(Long id, Pageable pageable);
 
+    Optional<Event> findByIdAndState(Long eventId, StatEnum state);
+
     Optional<Event> findByIdAndInitiatorId(Long eventId, Long userId);
 
     @Query("select e from Event as e " +
@@ -28,8 +30,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND (:text is null or lower(e.annotation) like lower(concat('%', :text,'%')) " +
             "OR lower(e.description) like lower(concat('%', :text,'%'))) " +
             "AND (:categories is null or e.category.id in :categories) " +
-            "AND (:paid is null or e.paid = :paid) " +
-            "AND  e.createdOn BETWEEN :rangeStart and :rangeEnd " +
+            "AND (:paid is null or cast(e.paid as boolean) = :paid) " +
+            "AND  e.eventDate BETWEEN :rangeStart and :rangeEnd " +
+            "AND e.state = 'PUBLISHED' " +
             "AND (:onlyAvailable is false or e.id in  (select p.event.id from ParticipationRequest as p" +
             " where p.event.id = e.id group by p.event.id " +
             "having (count (p.event.id) < e.participantLimit )))")
