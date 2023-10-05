@@ -19,7 +19,7 @@ public class StatService {
     private final StatMapper statMapper;
 
     public List<StatDtoGet> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        if(!end.isAfter(start))throw new BadRequestException();
+        if (!end.isAfter(start)) throw new BadRequestException();
         if ((uris == null || uris.isEmpty()) && (unique == null || !unique))
             return statRepository.findByDate(start, end);
         if (uris == null || uris.isEmpty()) return statRepository.findByUniqAndDate(start, end);
