@@ -10,15 +10,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.util.Map;
+
 @Component
 public class StatClient extends BaseClient {
 
     @Autowired
     public StatClient(@Value("${stat.server.url}") String serverUrl) {
-        super(new RestTemplateBuilder()
-                .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                .requestFactory(SimpleClientHttpRequestFactory::new)
-                .build());
+        super(new RestTemplateBuilder().uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl)).requestFactory(SimpleClientHttpRequestFactory::new).build());
     }
 
     public ResponseEntity<Object> getStats(String path, Map<String, Object> parameters) {
