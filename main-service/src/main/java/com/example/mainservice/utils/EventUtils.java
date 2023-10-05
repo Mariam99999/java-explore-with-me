@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 
 
 public class EventUtils {
-    public final static DateTimeFormatter DATE_TME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final DateTimeFormatter DATE_TME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static Event update(Event e, UpdateEventRequest m, Category category) {
         StatEnum stat = e.getState();

@@ -32,8 +32,8 @@ public class UserService {
         Pageable pageableWithSort = PageRequest.of(from, size);
         if (ids == null || ids.isEmpty()) return userRepository.findAll(pageableWithSort).getContent().stream()
                 .map(userMapper::mapFromUser).collect(Collectors.toList());
-        return userRepository.
-                findAllByIdIn(ids, pageableWithSort)
+        return userRepository
+                .findAllByIdIn(ids, pageableWithSort)
                 .stream().map(userMapper::mapFromUser)
                 .collect(Collectors.toList());
     }
