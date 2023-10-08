@@ -7,8 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-import static com.example.mainservice.utils.EventUtils.DATE_TME_FORMATTER;
-
 @AllArgsConstructor
 @Component
 public class EventMapper {
@@ -23,14 +21,14 @@ public class EventMapper {
                 .location(locationMapper.mapToDto(event.getLocation()))
                 .annotation(event.getAnnotation())
                 .category(event.getCategory())
-                .eventDate(event.getEventDate().format(DATE_TME_FORMATTER))
+                .eventDate(event.getEventDate())
                 .confirmedRequests(requests == null ? 0 : requests)
-                .createdOn(event.getCreatedOn().format(DATE_TME_FORMATTER))
+                .createdOn(event.getCreatedOn())
                 .description(event.getDescription())
                 .initiator(userMapper.mapToShortDto(event.getInitiator()))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
-                .publishedOn(event.getPublishedOn().format(DATE_TME_FORMATTER))
+                .publishedOn(event.getPublishedOn())
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .views(views)
@@ -68,7 +66,7 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(event.getCategory())
                 .confirmedRequests(requestSize)
-                .eventDate(event.getEventDate().format(DATE_TME_FORMATTER))
+                .eventDate(event.getEventDate())
                 .initiator(userMapper.mapToShortDto(event.getInitiator()))
                 .paid(event.getPaid())
                 .title(event.getTitle())
