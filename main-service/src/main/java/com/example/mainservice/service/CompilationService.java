@@ -1,18 +1,20 @@
 package com.example.mainservice.service;
 
+import com.example.mainservice.exception.Messages;
 import com.example.mainservice.exception.NotFoundException;
 import com.example.mainservice.mapper.CompilationMapper;
 import com.example.mainservice.mapper.EventMapper;
 import com.example.mainservice.model.*;
 import com.example.mainservice.storage.CompilationRepository;
 import com.example.mainservice.storage.EventRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -25,17 +27,17 @@ public class CompilationService {
     private final CompilationMapper compilationMapper;
     private final EventRepository eventRepository;
 
-    public CompilationDto addCompilation(NewCompilationDto newCompilationDto) throws JsonProcessingException {
+    public CompilationDto addCompilation(NewCompilationDto newCompilationDto) {
 
-        List<Event> events = newCompilationDto.getEvents() == null ? List.of() :
-                eventRepository.findAllById(newCompilationDto.getEvents());
+        Set<Event> events = (newCompilationDto.getEvents() == null) ? Set.of() :
+                new LinkedHashSet<>(eventRepository.findAllById(newCompilationDto.getEvents()));
         Compilation compilation = compilationMapper.toCompilation(newCompilationDto, events);
         Compilation c = compilationRepository.save(compilation);
         return compilationMapper.toCompilationDto(c, getEventsShortDto(c));
     }
 
     public void deleteCompilation(Long compId) {
-        compilationRepository.findById(compId).orElseThrow(NotFoundException::new);
+        compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         compilationRepository.deleteById(compId);
     }
 
@@ -45,33 +47,29 @@ public class CompilationService {
                 compilationRepository.findAll(pageable).getContent() :
                 compilationRepository.findAllByPinned(pinned, pageable);
         return compilations.stream()
-                .map(c -> {
-                    try {
-                        return compilationMapper.toCompilationDto(c, getEventsShortDto(c));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toList());
+                .map(c -> compilationMapper.toCompilationDto(c, getEventsShortDto(c))).collect(Collectors.toList());
     }
 
-    public CompilationDto getCompilationById(Long compId) throws JsonProcessingException {
-        Compilation compilation = compilationRepository.findById(compId).orElseThrow(NotFoundException::new);
+    public CompilationDto getCompilationById(Long compId) {
+        Compilation compilation = compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         return compilationMapper.toCompilationDto(compilation, getEventsShortDto(compilation));
     }
 
-    public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest updateCompilationRequest) throws JsonProcessingException {
-        Compilation compilation = compilationRepository.findById(compId).orElseThrow(NotFoundException::new);
-        List<Event> events = compilation.getEvents();
+    public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest updateCompilationRequest) {
+        Compilation compilation = compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
+        Set<Event> events = compilation.getEvents();
         if (updateCompilationRequest.getEvents() != null) {
-            events = eventRepository.findAllById(updateCompilationRequest.getEvents());
+            events = new LinkedHashSet<>(eventRepository.findAllById(updateCompilationRequest.getEvents()));
         }
         Compilation updatedComp = compilationMapper.toCompilationFromUpdateDto(compilation, updateCompilationRequest, events);
         Compilation savedCompilation = compilationRepository.save(updatedComp);
         return compilationMapper.toCompilationDto(savedCompilation, getEventsShortDto(savedCompilation));
     }
 
-    private List<EventShortDto> getEventsShortDto(Compilation compilation) throws JsonProcessingException {
-        List<Event> events = compilation.getEvents();
-        return eventService.getEventsDto(events).stream().map(eventMapper::mapToShortDto).collect(Collectors.toList());
+    private List<EventShortDto> getEventsShortDto(Compilation compilation) {
+        Set<Event> events = compilation.getEvents();
+        return events.stream()
+                .map(e -> eventMapper.mapToShortDtoFromEvent(e, null, null))
+                .collect(Collectors.toList());
     }
 }

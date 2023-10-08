@@ -5,15 +5,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class CompilationMapper {
     private final EventMapper eventMapper;
 
-    public Compilation toCompilation(NewCompilationDto newCompilationDto, List<Event> events) {
+    public Compilation toCompilation(NewCompilationDto newCompilationDto, Set<Event> events) {
         return new Compilation(null, events,
-                newCompilationDto.getPinned(),
+                newCompilationDto.isPinned(),
                 newCompilationDto.getTitle());
     }
 
@@ -24,9 +25,9 @@ public class CompilationMapper {
     }
 
     public Compilation toCompilationFromUpdateDto(Compilation compilation, UpdateCompilationRequest updateDto,
-                                                  List<Event> events) {
+                                                  Set<Event> events) {
         return new Compilation(compilation.getId(), events,
                 updateDto.getPinned() == null ? compilation.getPinned() : updateDto.getPinned(),
-                updateDto.getTitle() == null ? compilation.getTitle() : updateDto.getTitle());
+                updateDto.getTitle() == null || updateDto.getTitle().isBlank() ? compilation.getTitle() : updateDto.getTitle());
     }
 }

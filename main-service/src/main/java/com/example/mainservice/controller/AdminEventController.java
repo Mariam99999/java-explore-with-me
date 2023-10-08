@@ -3,12 +3,12 @@ package com.example.mainservice.controller;
 import com.example.mainservice.model.EventFullDto;
 import com.example.mainservice.model.UpdateEventRequest;
 import com.example.mainservice.service.EventService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,13 +23,13 @@ public class AdminEventController {
     }
 
     @GetMapping
-    public List<EventFullDto> getEventsByAmin(@RequestParam(required = false) List<Long> users,
-                                              @RequestParam(required = false) List<String> states,
-                                              @RequestParam(required = false) List<Long> categories,
-                                              @RequestParam(required = false) String rangeStart,
-                                              @RequestParam(required = false) String rangeEnd,
-                                              @RequestParam(defaultValue = "0") int from,
-                                              @RequestParam(defaultValue = "10") int size) throws JsonProcessingException {
+    public Set<EventFullDto> getEventsByAmin(@RequestParam(required = false) List<Long> users,
+                                             @RequestParam(required = false) List<String> states,
+                                             @RequestParam(required = false) List<Long> categories,
+                                             @RequestParam(required = false) String rangeStart,
+                                             @RequestParam(required = false) String rangeEnd,
+                                             @RequestParam(defaultValue = "0") int from,
+                                             @RequestParam(defaultValue = "10") int size) {
         return eventService.getEventsByAmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 }

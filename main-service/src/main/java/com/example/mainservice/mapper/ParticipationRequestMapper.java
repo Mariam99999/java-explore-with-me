@@ -8,7 +8,8 @@ import com.example.mainservice.model.User;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+import static com.example.mainservice.utils.EventUtils.DATE_TME_FORMATTER;
 
 @Component
 public class ParticipationRequestMapper {
@@ -19,7 +20,7 @@ public class ParticipationRequestMapper {
 
     public ParticipationRequestDto mapToParticipationRequestDto(ParticipationRequest participationRequest) {
         return new ParticipationRequestDto(participationRequest.getId(),
-                participationRequest.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                participationRequest.getCreated().format(DATE_TME_FORMATTER),
                 participationRequest.getEvent().getId(),
                 participationRequest.getRequester().getId(),
                 participationRequest.getStatus().toString());

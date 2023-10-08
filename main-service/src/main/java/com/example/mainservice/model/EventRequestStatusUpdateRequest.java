@@ -5,13 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @Data
 public class EventRequestStatusUpdateRequest {
     @NotNull
-    private List<Long> requestIds;
+    private Set<Long> requestIds;
     @NotNull
     private RequestStatus status;
 }

@@ -2,7 +2,6 @@ package com.example.mainservice.controller;
 
 import com.example.mainservice.model.CompilationDto;
 import com.example.mainservice.service.CompilationService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +21,7 @@ public class CompilationController {
     }
 
     @GetMapping("/{compId}")
-    public CompilationDto getCompilationById(@PathVariable Long compId) throws JsonProcessingException {
+    public CompilationDto getCompilationById(@PathVariable Long compId) {
         return compilationService.getCompilationById(compId);
     }
 }

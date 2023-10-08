@@ -4,7 +4,6 @@ import com.example.mainservice.model.CompilationDto;
 import com.example.mainservice.model.NewCompilationDto;
 import com.example.mainservice.model.UpdateCompilationRequest;
 import com.example.mainservice.service.CompilationService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,7 @@ public class AdminCompilationController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto addCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto) throws JsonProcessingException {
+    public CompilationDto addCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto) {
         return compilationService.addCompilation(newCompilationDto);
     }
 
@@ -32,7 +31,7 @@ public class AdminCompilationController {
 
     @PatchMapping("/{compId}")
     CompilationDto updateCompilation(@PathVariable Long compId,
-                                     @RequestBody @Valid UpdateCompilationRequest updateCompilationRequest) throws JsonProcessingException {
+                                     @RequestBody @Valid UpdateCompilationRequest updateCompilationRequest) {
         return compilationService.updateCompilation(compId, updateCompilationRequest);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.mainservice.service;
 
 import com.example.mainservice.exception.ConflictException;
+import com.example.mainservice.exception.Messages;
 import com.example.mainservice.exception.NotFoundException;
 import com.example.mainservice.mapper.CategoryMapper;
 import com.example.mainservice.model.Category;
@@ -27,17 +28,17 @@ public class CategoryService {
     }
 
     public void deleteCategory(Long id) {
-        categoryRepository.findById(id).orElseThrow(NotFoundException::new);
+        categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         try {
 
             categoryRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException();
+            throw new ConflictException(Messages.DB_CONFLICT.getMessage());
         }
     }
 
     public Category updateCategory(Long id, NewCategoryDto newCategoryDto) {
-        Category category = categoryRepository.findById(id).orElseThrow();
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         category.setName(newCategoryDto.getName());
         return tryToSave(category);
     }
@@ -49,14 +50,14 @@ public class CategoryService {
     }
 
     public Category getCategoryById(Long catId) {
-        return categoryRepository.findById(catId).orElseThrow(NotFoundException::new);
+        return categoryRepository.findById(catId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
     }
 
     private Category tryToSave(Category category) {
         try {
             return categoryRepository.save(category);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException();
+            throw new ConflictException(Messages.DB_CONFLICT.getMessage());
         }
     }
 

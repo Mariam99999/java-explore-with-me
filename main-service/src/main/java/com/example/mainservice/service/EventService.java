@@ -4,6 +4,7 @@ import com.example.mainservice.enums.RequestStatus;
 import com.example.mainservice.enums.StatEnum;
 import com.example.mainservice.exception.BadRequestException;
 import com.example.mainservice.exception.ConflictException;
+import com.example.mainservice.exception.Messages;
 import com.example.mainservice.exception.NotFoundException;
 import com.example.mainservice.mapper.EventMapper;
 import com.example.mainservice.model.*;
@@ -15,20 +16,19 @@ import com.example.mainservice.utils.EventUtils;
 import com.example.statserviceclient.client.StatClient;
 import com.example.statservicedto.StatDtoCreate;
 import com.example.statservicedto.StatDtoGet;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.example.mainservice.utils.EventUtils.DATE_TME_FORMATTER;
@@ -46,79 +46,77 @@ public class EventService {
 
 
     public EventFullDto addEvent(Long userId, NewEventDto newEventDto) {
-        if (!checkUpdatedData(newEventDto.getEventDate(), false)) throw new BadRequestException();
-        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
-        Category category = categoryRepository.findById(newEventDto.getCategory()).orElseThrow(NotFoundException::new);
+        if (!checkUpdatedData(newEventDto.getEventDate(), false))
+            throw new BadRequestException(Messages.BAD_REQUEST.getMessage());
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
+        Category category = categoryRepository.findById(newEventDto.getCategory()).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         Event event = eventRepository.save(eventMapper.mapToEvent(user, category, LocalDateTime.now(), newEventDto));
         return eventMapper.mapToDto(event, 0L, 0L);
     }
 
-    public List<EventFullDto> getEventByInitiatorId(Long id, int from, int size) throws JsonProcessingException {
+    public Set<EventFullDto> getEventByInitiatorId(Long id, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("createdOn").descending());
-        List<Event> events = eventRepository.findByInitiatorId(id, pageable);
+        Set<Event> events = new LinkedHashSet<>(eventRepository.findByInitiatorId(id, pageable));
         return getEventsDto(events);
     }
 
-    public EventFullDto getEventByIdAndInitiatorId(Long evenId, Long userId) throws JsonProcessingException {
-        Event event = eventRepository.findByIdAndInitiatorId(evenId, userId).orElseThrow(NotFoundException::new);
+    public EventFullDto getEventByIdAndInitiatorId(Long evenId, Long userId) {
+        Event event = eventRepository.findByIdAndInitiatorId(evenId, userId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         return getEventDto(event);
     }
 
     public EventFullDto updateEventByIdAndInitiatorId(Long evenId, Long userId, UpdateEventRequest updateEventRequest) {
-        if (!checkUpdatedData(updateEventRequest.getEventDate(), false)) throw new BadRequestException();
-        Event event = eventRepository.findByIdAndInitiatorId(evenId, userId).orElseThrow(NotFoundException::new);
+        if (!checkUpdatedData(updateEventRequest.getEventDate(), false))
+            throw new BadRequestException(Messages.BAD_REQUEST.getMessage());
+        Event event = eventRepository.findByIdAndInitiatorId(evenId, userId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         if (event.getState() == StatEnum.PUBLISHED)
-            throw new ConflictException();
+            throw new ConflictException(Messages.DB_CONFLICT.getMessage());
         return updateEvent(event, updateEventRequest);
     }
 
     public EventFullDto updateEventById(Long eventId, UpdateEventRequest updateEventRequest) {
-        if (!checkUpdatedData(updateEventRequest.getEventDate(), true)) throw new BadRequestException();
-        Event event = eventRepository.findById(eventId).orElseThrow(NotFoundException::new);
+        if (!checkUpdatedData(updateEventRequest.getEventDate(), true))
+            throw new BadRequestException(Messages.BAD_REQUEST.getMessage());
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         if (updateEventRequest.getStateAction() != null && event.getState() == StatEnum.PUBLISHED)
-            throw new ConflictException();
+            throw new ConflictException(Messages.DB_CONFLICT.getMessage());
         return updateEvent(event, updateEventRequest);
     }
 
-    public List<EventFullDto> getEventsByAmin(List<Long> users, List<String> states,
-                                              List<Long> categories, String rangeStart,
-                                              String rangeEnd, int from, int size) throws JsonProcessingException {
+    public Set<EventFullDto> getEventsByAmin(List<Long> users, List<String> states,
+                                             List<Long> categories, String rangeStart,
+                                             String rangeEnd, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("createdOn").descending());
         List<StatEnum> statEnums = null;
         if (states != null && !states.isEmpty())
             statEnums = states.stream().map(StatEnum::valueOf).collect(Collectors.toList());
-        List<Event> events = eventRepository.findByAdmin(users, statEnums, categories,
-                rangeStart == null ? LocalDateTime.now().minusYears(100) :
+        Set<Event> events = new LinkedHashSet<>(eventRepository.findByAdmin(users, statEnums, categories,
+                rangeStart == null ? LocalDateTime.now() :
                         LocalDateTime.parse(rangeStart, DATE_TME_FORMATTER),
-                rangeEnd == null ? LocalDateTime.now().plusYears(100) :
-                        LocalDateTime.parse(rangeEnd, DATE_TME_FORMATTER), pageable);
+                rangeEnd == null ? null :
+                        LocalDateTime.parse(rangeEnd, DATE_TME_FORMATTER), pageable));
         return getEventsDto(events);
 
     }
 
-    public List<EventFullDto> getEventsByFilter(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                                String rangeEnd, Boolean onlyAvailable, String sort, int from, int size,
-                                                HttpServletRequest httpServletRequest) throws JsonProcessingException {
+    public Set<EventFullDto> getEventsByFilter(String text, List<Long> categories, Boolean paid, String rangeStart,
+                                               String rangeEnd, Boolean onlyAvailable, String sort, int from, int size,
+                                               HttpServletRequest httpServletRequest) {
         saveState(httpServletRequest);
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(sort == null || sort.equals("EVENT_DATE") ? "createdOn" : "views").descending());
-        List<Event> events = eventRepository.findByFilters(text, categories, paid,
+        Set<Event> events = new LinkedHashSet<>(eventRepository.findByFilters(text, categories, paid,
                 rangeStart == null ? LocalDateTime.now().plusSeconds(1) :
                         LocalDateTime.parse(rangeStart, DATE_TME_FORMATTER),
-                rangeEnd == null ? LocalDateTime.now().plusYears(100) :
-                        LocalDateTime.parse(rangeEnd, DATE_TME_FORMATTER), onlyAvailable, pageable);
-        if (events.isEmpty()) throw new BadRequestException();
+                rangeEnd == null ? null :
+                        LocalDateTime.parse(rangeEnd, DATE_TME_FORMATTER), onlyAvailable, pageable));
+        if (events.isEmpty()) throw new BadRequestException(Messages.BAD_REQUEST.getMessage());
 
         return getEventsDto(events);
     }
 
-    public EventFullDto getEventById(Long eventId, HttpServletRequest httpServletRequest) throws JsonProcessingException {
+    public EventFullDto getEventById(Long eventId, HttpServletRequest httpServletRequest) {
         saveState(httpServletRequest);
-        ResponseEntity<Object> stats = statClient.getStats("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
-                Map.of("start", LocalDateTime.now().minusYears(100).format(DATE_TME_FORMATTER),
-                        "end", LocalDateTime.now().plusYears(100).format(DATE_TME_FORMATTER),
-                        "uris", "events/" + eventId,
-                        "unique", "true"));
-        Event event = eventRepository.findByIdAndState(eventId, StatEnum.PUBLISHED).orElseThrow(NotFoundException::new);
+        Event event = eventRepository.findByIdAndState(eventId, StatEnum.PUBLISHED).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         return getEventDto(event);
     }
 
@@ -126,22 +124,19 @@ public class EventService {
         statClient.saveStat("/hit", new StatDtoCreate("main-service", httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr(), LocalDateTime.now()));
     }
 
-    private List<ParticipationRequest> getRequests(List<Event> events) {
+    private List<ParticipationRequest> getRequests(Set<Event> events) {
         return requestRepository.findByEventIdInAndStatus(events.stream().map(Event::getId).collect(Collectors.toList()), RequestStatus.CONFIRMED);
     }
 
-    private List<StatDtoGet> getStats(List<Event> events) throws JsonProcessingException {
-        ResponseEntity<Object> stats = statClient.getStats("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
-                Map.of("start", LocalDateTime.now().minusYears(100).format(DATE_TME_FORMATTER),
-                        "end", LocalDateTime.now().plusYears(100).format(DATE_TME_FORMATTER),
+    private List<StatDtoGet> getStats(Set<Event> events) {
+        return statClient.getStats("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
+                Map.of("start", getDateStart(events).format(DATE_TME_FORMATTER),
+                        "end", LocalDateTime.now().plusSeconds(1).format(DATE_TME_FORMATTER),
                         "uris", events.stream().map(event -> "/events/" + event.getId()).collect(Collectors.joining(",")),
                         "unique", "true"));
-        String bodyString = objectMapper.writeValueAsString(stats.getBody());
-
-        return Arrays.asList(objectMapper.readValue(bodyString, StatDtoGet[].class));
     }
 
-    private Map<String, Long> getHitsMap(List<Event> events) throws JsonProcessingException {
+    private Map<String, Long> getHitsMap(Set<Event> events) {
         List<StatDtoGet> stats = getStats(events);
         return stats.stream().collect(Collectors.toMap(s -> s.getUri().replace("/events/", ""), StatDtoGet::getHits));
     }
@@ -150,15 +145,23 @@ public class EventService {
         return requests.stream().filter(r -> r.getEvent().getId().equals(id)).count();
     }
 
-    public List<EventFullDto> getEventsDto(List<Event> events) throws JsonProcessingException {
-        List<ParticipationRequest> requests = getRequests(events);
+    public Set<EventFullDto> getEventsDto(Set<Event> events) {
+        List<EventRequestShort> requests = requestRepository.findShortByIdsAndStatus(events
+                .stream()
+                .map(Event::getId)
+                .collect(Collectors.toList()), RequestStatus.CONFIRMED);
+        Map<Long, Long> requestMap = requests
+                .stream()
+                .collect(Collectors.toMap(EventRequestShort::getEventId, EventRequestShort::getCount));
         Map<String, Long> hits = getHitsMap(events);
-        return events.stream().map(e -> eventMapper.mapToDto(e, getRequestCount(requests, e.getId()), hits.get(e.getId().toString()))).collect(Collectors.toList());
+        return events.stream().map(e -> eventMapper.mapToDto(e,
+                requestMap.get(e.getId()),
+                hits.get(e.getId().toString()))).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private EventFullDto getEventDto(Event event) throws JsonProcessingException {
-        Long requests = (long) getRequests(List.of(event)).size();
-        List<StatDtoGet> stats = getStats(List.of(event));
+    private EventFullDto getEventDto(Event event) {
+        Long requests = (long) getRequests(Set.of(event)).size();
+        List<StatDtoGet> stats = getStats(Set.of(event));
         Long views = stats.isEmpty() ? 0L : stats.get(0).getHits();
         return eventMapper.mapToDto(event, requests, views);
     }
@@ -166,15 +169,21 @@ public class EventService {
     private EventFullDto updateEvent(Event event, UpdateEventRequest updateEventUserRequest) {
         Category category = null;
         if (updateEventUserRequest.getCategory() != null) {
-            category = categoryRepository.findById(updateEventUserRequest.getCategory()).orElseThrow(NotFoundException::new);
+            category = categoryRepository.findById(updateEventUserRequest.getCategory()).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         }
+        Long requests = (long) getRequests(Set.of(event)).size();
+        List<StatDtoGet> stats = getStats(Set.of(event));
+        Long views = stats.isEmpty() ? 0L : stats.get(0).getHits();
         return eventMapper.mapToDto(eventRepository.save(EventUtils.update(event, updateEventUserRequest, category)),
-                event.getConfirmedRequests(), event.getViews());
-
+                requests, views);
     }
 
-    private Boolean checkUpdatedData(String data, Boolean isAdmin) {
+    private Boolean checkUpdatedData(LocalDateTime data, Boolean isAdmin) {
         if (data == null) return true;
-        return (LocalDateTime.parse(data, DATE_TME_FORMATTER)).isAfter(LocalDateTime.now().plusHours(isAdmin ? 1 : 2));
+        return (data.isAfter(LocalDateTime.now().plusHours(isAdmin ? 1 : 2)));
+    }
+
+    private LocalDateTime getDateStart(Set<Event> events) {
+        return events.stream().map(Event::getPublishedOn).min(LocalDateTime::compareTo).orElseThrow(() -> new BadRequestException(Messages.BAD_REQUEST.getMessage()));
     }
 }

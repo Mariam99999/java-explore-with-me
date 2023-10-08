@@ -3,13 +3,13 @@ package com.example.mainservice.controller;
 import com.example.mainservice.model.*;
 import com.example.mainservice.service.EventService;
 import com.example.mainservice.service.ParticipationRequestService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,14 +27,14 @@ public class PrivateEventController {
     }
 
     @GetMapping
-    public List<EventFullDto> getEventsByInitiatorId(@PathVariable Long userId,
-                                                     @RequestParam(defaultValue = "0") int from,
-                                                     @RequestParam(defaultValue = "10") int size) throws JsonProcessingException {
+    public Set<EventFullDto> getEventsByInitiatorId(@PathVariable Long userId,
+                                                    @RequestParam(defaultValue = "0") int from,
+                                                    @RequestParam(defaultValue = "10") int size) {
         return eventService.getEventByInitiatorId(userId, from, size);
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto getEventByIdAndInitiatorId(@PathVariable Long eventId, @PathVariable Long userId) throws JsonProcessingException {
+    public EventFullDto getEventByIdAndInitiatorId(@PathVariable Long eventId, @PathVariable Long userId) {
         return eventService.getEventByIdAndInitiatorId(eventId, userId);
     }
 

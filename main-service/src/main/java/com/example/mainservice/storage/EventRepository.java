@@ -21,7 +21,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "where (:users is null or e.initiator.id in :users) " +
             "AND (:states is null or e.state in :states) " +
             "AND (:categories is null or e.category.id in :categories) " +
-            "AND  e.createdOn BETWEEN :rangeStart and :rangeEnd")
+            "AND (COALESCE(:rangeStart) IS null OR e.eventDate >= :rangeStart) " +
+            "AND (COALESCE(:rangeEnd) IS null OR e.eventDate <= :rangeEnd)")
     List<Event> findByAdmin(List<Long> users, List<StatEnum> states, List<Long> categories,
                             LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
 
@@ -31,7 +32,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "OR lower(e.description) like lower(concat('%', :text,'%'))) " +
             "AND (:categories is null or e.category.id in :categories) " +
             "AND (:paid is null or cast(e.paid as boolean) = :paid) " +
-            "AND  e.eventDate BETWEEN :rangeStart and :rangeEnd " +
+            "AND (COALESCE(:rangeStart) IS null OR e.eventDate >= :rangeStart) " +
+            "AND (COALESCE(:rangeEnd) IS null OR e.eventDate <= :rangeEnd) " +
             "AND e.state = 'PUBLISHED' " +
             "AND (:onlyAvailable is false or e.id in  (select p.event.id from ParticipationRequest as p" +
             " where p.event.id = e.id group by p.event.id " +
