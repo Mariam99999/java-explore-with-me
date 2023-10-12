@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @Component
@@ -14,7 +15,7 @@ public class EventMapper {
     private final LocationMapper locationMapper;
 
 
-    public EventFullDto mapToDto(Event event, Long requests, Long views) {
+    public EventFullDto mapToDto(Event event, Long requests, Long views, List<CommentDto> comments) {
         return EventFullDto.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -22,7 +23,6 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(event.getCategory())
                 .eventDate(event.getEventDate())
-                .confirmedRequests(requests == null ? 0 : requests)
                 .createdOn(event.getCreatedOn())
                 .description(event.getDescription())
                 .initiator(userMapper.mapToShortDto(event.getInitiator()))
@@ -30,8 +30,10 @@ public class EventMapper {
                 .participantLimit(event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())
                 .requestModeration(event.getRequestModeration())
+                .confirmedRequests(requests == null ? 0 : requests)
                 .state(event.getState())
                 .views(views)
+                .comments(comments)
                 .build();
     }
 

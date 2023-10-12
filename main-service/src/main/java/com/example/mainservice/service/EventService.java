@@ -6,17 +6,14 @@ import com.example.mainservice.exception.BadRequestException;
 import com.example.mainservice.exception.ConflictException;
 import com.example.mainservice.exception.Messages;
 import com.example.mainservice.exception.NotFoundException;
+import com.example.mainservice.mapper.CommentMapper;
 import com.example.mainservice.mapper.EventMapper;
 import com.example.mainservice.model.*;
-import com.example.mainservice.storage.CategoryRepository;
-import com.example.mainservice.storage.EventRepository;
-import com.example.mainservice.storage.ParticipationRequestRepository;
-import com.example.mainservice.storage.UserRepository;
+import com.example.mainservice.storage.*;
 import com.example.mainservice.utils.EventUtils;
 import com.example.statserviceclient.client.StatClient;
 import com.example.statservicedto.StatDtoCreate;
 import com.example.statservicedto.StatDtoGet;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,10 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.mainservice.utils.EventUtils.DATE_TME_FORMATTER;
@@ -39,11 +33,11 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
     private final EventMapper eventMapper;
     private final StatClient statClient;
     private final ParticipationRequestRepository requestRepository;
-    private final ObjectMapper objectMapper;
-
 
     public EventFullDto addEvent(Long userId, NewEventDto newEventDto) {
         if (!checkUpdatedData(newEventDto.getEventDate(), false))
@@ -51,7 +45,7 @@ public class EventService {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         Category category = categoryRepository.findById(newEventDto.getCategory()).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         Event event = eventRepository.save(eventMapper.mapToEvent(user, category, LocalDateTime.now(), newEventDto));
-        return eventMapper.mapToDto(event, 0L, 0L);
+        return eventMapper.mapToDto(event, 0L, 0L, List.of());
     }
 
     public Set<EventFullDto> getEventByInitiatorId(Long id, int from, int size) {
@@ -141,29 +135,27 @@ public class EventService {
         return stats.stream().collect(Collectors.toMap(s -> s.getUri().replace("/events/", ""), StatDtoGet::getHits));
     }
 
-    private Long getRequestCount(List<ParticipationRequest> requests, Long id) {
-        return requests.stream().filter(r -> r.getEvent().getId().equals(id)).count();
-    }
-
     public Set<EventFullDto> getEventsDto(Set<Event> events) {
-        List<EventRequestShort> requests = requestRepository.findShortByIdsAndStatus(events
-                .stream()
+        List<Long> eventIds = events.stream()
                 .map(Event::getId)
-                .collect(Collectors.toList()), RequestStatus.CONFIRMED);
+                .collect(Collectors.toList());
+        List<EventRequestShort> requests = requestRepository.findShortByIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
         Map<Long, Long> requestMap = requests
                 .stream()
                 .collect(Collectors.toMap(EventRequestShort::getEventId, EventRequestShort::getCount));
         Map<String, Long> hits = getHitsMap(events);
+        Map<Long, List<CommentDto>> commentMap = getCommentMap(eventIds);
         return events.stream().map(e -> eventMapper.mapToDto(e,
                 requestMap.get(e.getId()),
-                hits.get(e.getId().toString()))).collect(Collectors.toCollection(LinkedHashSet::new));
+                hits.get(e.getId().toString()), commentMap.get(e.getId()))).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private EventFullDto getEventDto(Event event) {
         Long requests = (long) getRequests(Set.of(event)).size();
         List<StatDtoGet> stats = getStats(Set.of(event));
         Long views = stats.isEmpty() ? 0L : stats.get(0).getHits();
-        return eventMapper.mapToDto(event, requests, views);
+        Map<Long, List<CommentDto>> commentMap = getCommentMap(List.of(event.getId()));
+        return eventMapper.mapToDto(event, requests, views, commentMap.get(event.getId()));
     }
 
     private EventFullDto updateEvent(Event event, UpdateEventRequest updateEventUserRequest) {
@@ -171,11 +163,8 @@ public class EventService {
         if (updateEventUserRequest.getCategory() != null) {
             category = categoryRepository.findById(updateEventUserRequest.getCategory()).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         }
-        Long requests = (long) getRequests(Set.of(event)).size();
-        List<StatDtoGet> stats = getStats(Set.of(event));
-        Long views = stats.isEmpty() ? 0L : stats.get(0).getHits();
-        return eventMapper.mapToDto(eventRepository.save(EventUtils.update(event, updateEventUserRequest, category)),
-                requests, views);
+        Event updatedEvent = eventRepository.save(EventUtils.update(event, updateEventUserRequest, category));
+        return getEventDto(updatedEvent);
     }
 
     private Boolean checkUpdatedData(LocalDateTime data, Boolean isAdmin) {
@@ -185,5 +174,15 @@ public class EventService {
 
     private LocalDateTime getDateStart(Set<Event> events) {
         return events.stream().map(Event::getPublishedOn).min(LocalDateTime::compareTo).orElseThrow(() -> new BadRequestException(Messages.BAD_REQUEST.getMessage()));
+    }
+
+    private Map<Long, List<CommentDto>> getCommentMap(List<Long> eventIds) {
+        Sort sort = Sort.by("createdOn").descending();
+        List<Comment> comments = commentRepository.findAllByEventIdIn(eventIds, sort);
+        Map<Long, List<CommentDto>> map = new HashMap<>();
+        for (Comment comment : comments) {
+            map.computeIfAbsent(comment.getEvent().getId(), k -> new ArrayList<>()).add(commentMapper.mapToCommentDto(comment));
+        }
+        return map;
     }
 }

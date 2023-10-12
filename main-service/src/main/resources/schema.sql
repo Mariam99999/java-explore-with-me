@@ -52,4 +52,12 @@ CREATE TABLE IF NOT EXISTS compilation_events
     event_id       BIGINT not null references events (id),
     CONSTRAINT pk PRIMARY KEY (compilation_id, event_id)
 );
+CREATE TABLE IF NOT EXISTS comment
+(
+    id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    event_id   bigint                      not null,
+    user_id    bigint                      not null,
+    created_on TIMESTAMP WITHOUT TIME ZONE not null,
+    text       varchar                     not null
+);
 

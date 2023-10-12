@@ -2,6 +2,7 @@ package com.example.mainservice.controller;
 
 import com.example.mainservice.model.EventFullDto;
 import com.example.mainservice.model.UpdateEventRequest;
+import com.example.mainservice.service.CommentService;
 import com.example.mainservice.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.Set;
 @RequestMapping("/admin/events")
 public class AdminEventController {
     private final EventService eventService;
+    private final CommentService commentService;
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
@@ -31,5 +33,11 @@ public class AdminEventController {
                                              @RequestParam(defaultValue = "0") int from,
                                              @RequestParam(defaultValue = "10") int size) {
         return eventService.getEventsByAmin(users, states, categories, rangeStart, rangeEnd, from, size);
+    }
+
+    @DeleteMapping("/{eventId}/comment/{commentId}")
+    public void deleteComment(@PathVariable Long eventId,
+                              @PathVariable Long commentId) {
+        commentService.deleteCommentByAdmin(eventId, commentId);
     }
 }
