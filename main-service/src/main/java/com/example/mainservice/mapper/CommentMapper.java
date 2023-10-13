@@ -12,10 +12,12 @@ public class CommentMapper {
     private final UserMapper userMapper;
 
     public Comment mapToComment(CommentCreateDto commentCreateDto, Event event, User user) {
-        return new Comment(null, event, user, commentCreateDto.getText(), LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        return new Comment(null, event, user, commentCreateDto.getText(), now, now);
     }
 
     public CommentDto mapToCommentDto(Comment comment) {
-        return new CommentDto(userMapper.mapToShortDto(comment.getUser()), comment.getCreatedOn(), comment.getText());
+        return new CommentDto(userMapper.mapToShortDto(comment.getUser()), comment.getCreatedOn(),
+                comment.getUpdatedOn(), comment.getText());
     }
 }

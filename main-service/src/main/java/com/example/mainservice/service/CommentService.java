@@ -12,6 +12,8 @@ import com.example.mainservice.storage.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 
 @Service
 @AllArgsConstructor
@@ -31,6 +33,10 @@ public class CommentService {
 
     public CommentDto updateComment(Long userId, Long eventId, Long commentId, CommentCreateDto commentCreateDto) {
         Comment comment = getComment(userId, eventId, commentId);
+        if (!comment.getCreatedOn().isAfter(LocalDateTime.now().minusHours(1)))
+            throw new BadRequestException(Messages.UPDATE_TIME_HAS_EXPIRED.getMessage());
+        if (commentCreateDto.getText().equals(comment.getText())) return commentMapper.mapToCommentDto(comment);
+        comment.setUpdatedOn(LocalDateTime.now());
         comment.setText(commentCreateDto.getText());
         return commentMapper.mapToCommentDto(commentRepository.save(comment));
     }
@@ -41,14 +47,18 @@ public class CommentService {
     }
 
     public void deleteCommentByAdmin(Long eventId, Long commentId) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new BadRequestException(Messages.RESOURCE_NOT_FOUND.getMessage()));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         if (!comment.getEvent().getId().equals(eventId))
             throw new BadRequestException(Messages.BAD_REQUEST.getMessage());
         commentRepository.deleteById(commentId);
     }
 
+    public CommentDto getCommentById(Long commentId) {
+        return commentMapper.mapToCommentDto(commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage())));
+    }
+
     private Comment getComment(Long userId, Long eventId, Long commentId) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new BadRequestException(Messages.RESOURCE_NOT_FOUND.getMessage()));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         if (!comment.getEvent().getInitiator().getId().equals(userId) && !comment.getUser().getId().equals(userId) || !comment.getEvent().getId().equals(eventId))
             throw new BadRequestException(Messages.DONT_HAVE_ENOUGH_RIGHTS.getMessage());
         return comment;

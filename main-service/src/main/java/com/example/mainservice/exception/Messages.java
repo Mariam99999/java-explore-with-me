@@ -9,7 +9,8 @@ public enum Messages {
     BAD_REQUEST,
     DB_CONFLICT,
     EVENT_NOT_PUBLISHED,
-    DONT_HAVE_ENOUGH_RIGHTS;
+    DONT_HAVE_ENOUGH_RIGHTS,
+    UPDATE_TIME_HAS_EXPIRED;
 
     public String getMessage() {
         return StringUtils.capitalize(this.name()

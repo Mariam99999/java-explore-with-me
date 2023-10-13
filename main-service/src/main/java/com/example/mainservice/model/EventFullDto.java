@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,5 +34,6 @@ public class EventFullDto {
     private StatEnum state;
     private String title;
     private Long views;
-    private List<CommentDto> comments;
+    private Long comments;
+
 }

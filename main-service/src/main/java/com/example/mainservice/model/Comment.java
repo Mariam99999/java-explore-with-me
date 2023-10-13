@@ -29,4 +29,7 @@ public class Comment {
     @Column(name = "created_on")
     @NotNull
     private LocalDateTime createdOn;
+    @Column(name = "updated_on")
+    @NotNull
+    private LocalDateTime updatedOn;
 }

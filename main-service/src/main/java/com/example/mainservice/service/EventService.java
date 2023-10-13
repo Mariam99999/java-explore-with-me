@@ -22,7 +22,10 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.example.mainservice.utils.EventUtils.DATE_TME_FORMATTER;
@@ -45,7 +48,7 @@ public class EventService {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         Category category = categoryRepository.findById(newEventDto.getCategory()).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         Event event = eventRepository.save(eventMapper.mapToEvent(user, category, LocalDateTime.now(), newEventDto));
-        return eventMapper.mapToDto(event, 0L, 0L, List.of());
+        return eventMapper.mapToDto(event, 0L, 0L);
     }
 
     public Set<EventFullDto> getEventByInitiatorId(Long id, int from, int size) {
@@ -144,18 +147,22 @@ public class EventService {
                 .stream()
                 .collect(Collectors.toMap(EventRequestShort::getEventId, EventRequestShort::getCount));
         Map<String, Long> hits = getHitsMap(events);
-        Map<Long, List<CommentDto>> commentMap = getCommentMap(eventIds);
         return events.stream().map(e -> eventMapper.mapToDto(e,
                 requestMap.get(e.getId()),
-                hits.get(e.getId().toString()), commentMap.get(e.getId()))).collect(Collectors.toCollection(LinkedHashSet::new));
+                hits.get(e.getId().toString()))).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public List<CommentDto> getCommentsByEventId(Long eventId, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("createdOn").descending());
+        return commentRepository.findAllByEventId(eventId, pageable).stream()
+                .map(commentMapper::mapToCommentDto).collect(Collectors.toList());
     }
 
     private EventFullDto getEventDto(Event event) {
         Long requests = (long) getRequests(Set.of(event)).size();
         List<StatDtoGet> stats = getStats(Set.of(event));
         Long views = stats.isEmpty() ? 0L : stats.get(0).getHits();
-        Map<Long, List<CommentDto>> commentMap = getCommentMap(List.of(event.getId()));
-        return eventMapper.mapToDto(event, requests, views, commentMap.get(event.getId()));
+        return eventMapper.mapToDto(event, requests, views);
     }
 
     private EventFullDto updateEvent(Event event, UpdateEventRequest updateEventUserRequest) {
@@ -174,15 +181,5 @@ public class EventService {
 
     private LocalDateTime getDateStart(Set<Event> events) {
         return events.stream().map(Event::getPublishedOn).min(LocalDateTime::compareTo).orElseThrow(() -> new BadRequestException(Messages.BAD_REQUEST.getMessage()));
-    }
-
-    private Map<Long, List<CommentDto>> getCommentMap(List<Long> eventIds) {
-        Sort sort = Sort.by("createdOn").descending();
-        List<Comment> comments = commentRepository.findAllByEventIdIn(eventIds, sort);
-        Map<Long, List<CommentDto>> map = new HashMap<>();
-        for (Comment comment : comments) {
-            map.computeIfAbsent(comment.getEvent().getId(), k -> new ArrayList<>()).add(commentMapper.mapToCommentDto(comment));
-        }
-        return map;
     }
 }

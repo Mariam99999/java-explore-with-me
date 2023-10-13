@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @AllArgsConstructor
 @Component
@@ -15,7 +14,7 @@ public class EventMapper {
     private final LocationMapper locationMapper;
 
 
-    public EventFullDto mapToDto(Event event, Long requests, Long views, List<CommentDto> comments) {
+    public EventFullDto mapToDto(Event event, Long requests, Long views) {
         return EventFullDto.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -33,7 +32,7 @@ public class EventMapper {
                 .confirmedRequests(requests == null ? 0 : requests)
                 .state(event.getState())
                 .views(views)
-                .comments(comments)
+                .comments(event.getComments())
                 .build();
     }
 
@@ -53,13 +52,8 @@ public class EventMapper {
                 .publishedOn(LocalDateTime.now())
                 .requestModeration(newEventDto.isRequestModeration())
                 .state(StatEnum.PENDING)
+                .comments(0L)
                 .build();
-    }
-
-    public EventShortDto mapToShortDto(EventFullDto event) {
-        return new EventShortDto(event.getId(), event.getAnnotation(), event.getCategory(),
-                event.getConfirmedRequests(), event.getEventDate(), event.getInitiator(),
-                event.getPaid(), event.getTitle(), event.getParticipantLimit());
     }
 
     public EventShortDto mapToShortDtoFromEvent(Event event, Long requestSize, Integer views) {
@@ -72,6 +66,7 @@ public class EventMapper {
                 .initiator(userMapper.mapToShortDto(event.getInitiator()))
                 .paid(event.getPaid())
                 .title(event.getTitle())
+                .views(views)
                 .build();
     }
 }

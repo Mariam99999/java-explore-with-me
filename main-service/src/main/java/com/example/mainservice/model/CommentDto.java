@@ -24,5 +24,6 @@ import java.time.LocalDateTime;
 public class CommentDto {
     private UserShortDto user;
     private LocalDateTime createdOn;
+    private LocalDateTime updateOn;
     private String text;
 }

@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS comment
     event_id   bigint                      not null,
     user_id    bigint                      not null,
     created_on TIMESTAMP WITHOUT TIME ZONE not null,
+    updated_on TIMESTAMP WITHOUT TIME ZONE not null,
     text       varchar                     not null
 );
 
