@@ -1,6 +1,7 @@
 package com.example.mainservice.controller;
 
 import com.example.mainservice.model.*;
+import com.example.mainservice.service.CommentService;
 import com.example.mainservice.service.EventService;
 import com.example.mainservice.service.ParticipationRequestService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Set;
 public class PrivateEventController {
     private final EventService eventService;
     private final ParticipationRequestService participationRequestService;
+    private final CommentService commentService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -57,5 +59,27 @@ public class PrivateEventController {
         return participationRequestService.updateStatus(userId, eventId, e);
     }
 
+    @PostMapping(("/{eventId}/comment"))
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto addComment(@PathVariable Long userId,
+                                 @PathVariable Long eventId,
+                                 @RequestBody @Valid CommentCreateDto commentCreateDto) {
+        return commentService.addComment(eventId, userId, commentCreateDto);
+    }
+
+    @PatchMapping("/{eventId}/comment/{commentId}")
+    public CommentDto updateComment(@PathVariable Long userId,
+                                    @PathVariable Long eventId,
+                                    @PathVariable Long commentId,
+                                    @RequestBody @Valid CommentCreateDto commentCreateDto) {
+        return commentService.updateComment(userId, eventId, commentId, commentCreateDto);
+    }
+
+    @DeleteMapping("/{eventId}/comment/{commentId}")
+    public void deleteComment(@PathVariable Long userId,
+                              @PathVariable Long eventId,
+                              @PathVariable Long commentId) {
+        commentService.deleteCommentByUser(userId, eventId, commentId);
+    }
 
 }

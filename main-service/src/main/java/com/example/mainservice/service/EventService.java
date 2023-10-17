@@ -6,17 +6,14 @@ import com.example.mainservice.exception.BadRequestException;
 import com.example.mainservice.exception.ConflictException;
 import com.example.mainservice.exception.Messages;
 import com.example.mainservice.exception.NotFoundException;
+import com.example.mainservice.mapper.CommentMapper;
 import com.example.mainservice.mapper.EventMapper;
 import com.example.mainservice.model.*;
-import com.example.mainservice.storage.CategoryRepository;
-import com.example.mainservice.storage.EventRepository;
-import com.example.mainservice.storage.ParticipationRequestRepository;
-import com.example.mainservice.storage.UserRepository;
+import com.example.mainservice.storage.*;
 import com.example.mainservice.utils.EventUtils;
 import com.example.statserviceclient.client.StatClient;
 import com.example.statservicedto.StatDtoCreate;
 import com.example.statservicedto.StatDtoGet;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,11 +36,11 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
     private final EventMapper eventMapper;
     private final StatClient statClient;
     private final ParticipationRequestRepository requestRepository;
-    private final ObjectMapper objectMapper;
-
 
     public EventFullDto addEvent(Long userId, NewEventDto newEventDto) {
         if (!checkUpdatedData(newEventDto.getEventDate(), false))
@@ -141,15 +138,11 @@ public class EventService {
         return stats.stream().collect(Collectors.toMap(s -> s.getUri().replace("/events/", ""), StatDtoGet::getHits));
     }
 
-    private Long getRequestCount(List<ParticipationRequest> requests, Long id) {
-        return requests.stream().filter(r -> r.getEvent().getId().equals(id)).count();
-    }
-
     public Set<EventFullDto> getEventsDto(Set<Event> events) {
-        List<EventRequestShort> requests = requestRepository.findShortByIdsAndStatus(events
-                .stream()
+        List<Long> eventIds = events.stream()
                 .map(Event::getId)
-                .collect(Collectors.toList()), RequestStatus.CONFIRMED);
+                .collect(Collectors.toList());
+        List<EventRequestShort> requests = requestRepository.findShortByIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
         Map<Long, Long> requestMap = requests
                 .stream()
                 .collect(Collectors.toMap(EventRequestShort::getEventId, EventRequestShort::getCount));
@@ -157,6 +150,12 @@ public class EventService {
         return events.stream().map(e -> eventMapper.mapToDto(e,
                 requestMap.get(e.getId()),
                 hits.get(e.getId().toString()))).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public List<CommentDto> getCommentsByEventId(Long eventId, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("createdOn").descending());
+        return commentRepository.findAllByEventId(eventId, pageable).stream()
+                .map(commentMapper::mapToCommentDto).collect(Collectors.toList());
     }
 
     private EventFullDto getEventDto(Event event) {
@@ -171,11 +170,8 @@ public class EventService {
         if (updateEventUserRequest.getCategory() != null) {
             category = categoryRepository.findById(updateEventUserRequest.getCategory()).orElseThrow(() -> new NotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage()));
         }
-        Long requests = (long) getRequests(Set.of(event)).size();
-        List<StatDtoGet> stats = getStats(Set.of(event));
-        Long views = stats.isEmpty() ? 0L : stats.get(0).getHits();
-        return eventMapper.mapToDto(eventRepository.save(EventUtils.update(event, updateEventUserRequest, category)),
-                requests, views);
+        Event updatedEvent = eventRepository.save(EventUtils.update(event, updateEventUserRequest, category));
+        return getEventDto(updatedEvent);
     }
 
     private Boolean checkUpdatedData(LocalDateTime data, Boolean isAdmin) {

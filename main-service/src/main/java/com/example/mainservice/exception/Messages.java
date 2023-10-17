@@ -7,7 +7,10 @@ public enum Messages {
     VALIDATION_EXCEPTION,
     RESOURCE_NOT_FOUND,
     BAD_REQUEST,
-    DB_CONFLICT;
+    DB_CONFLICT,
+    EVENT_NOT_PUBLISHED,
+    DONT_HAVE_ENOUGH_RIGHTS,
+    UPDATE_TIME_HAS_EXPIRED;
 
     public String getMessage() {
         return StringUtils.capitalize(this.name()

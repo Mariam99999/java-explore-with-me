@@ -22,7 +22,6 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(event.getCategory())
                 .eventDate(event.getEventDate())
-                .confirmedRequests(requests == null ? 0 : requests)
                 .createdOn(event.getCreatedOn())
                 .description(event.getDescription())
                 .initiator(userMapper.mapToShortDto(event.getInitiator()))
@@ -30,8 +29,10 @@ public class EventMapper {
                 .participantLimit(event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn())
                 .requestModeration(event.getRequestModeration())
+                .confirmedRequests(requests == null ? 0 : requests)
                 .state(event.getState())
                 .views(views)
+                .comments(event.getComments())
                 .build();
     }
 
@@ -51,13 +52,8 @@ public class EventMapper {
                 .publishedOn(LocalDateTime.now())
                 .requestModeration(newEventDto.isRequestModeration())
                 .state(StatEnum.PENDING)
+                .comments(0L)
                 .build();
-    }
-
-    public EventShortDto mapToShortDto(EventFullDto event) {
-        return new EventShortDto(event.getId(), event.getAnnotation(), event.getCategory(),
-                event.getConfirmedRequests(), event.getEventDate(), event.getInitiator(),
-                event.getPaid(), event.getTitle(), event.getParticipantLimit());
     }
 
     public EventShortDto mapToShortDtoFromEvent(Event event, Long requestSize, Integer views) {
@@ -70,6 +66,7 @@ public class EventMapper {
                 .initiator(userMapper.mapToShortDto(event.getInitiator()))
                 .paid(event.getPaid())
                 .title(event.getTitle())
+                .views(views)
                 .build();
     }
 }

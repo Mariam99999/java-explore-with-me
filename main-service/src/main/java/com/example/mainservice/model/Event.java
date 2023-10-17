@@ -3,6 +3,7 @@ package com.example.mainservice.model;
 
 import com.example.mainservice.enums.StatEnum;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -47,5 +48,6 @@ public class Event {
     @Column(name = "state_enum")
     private StatEnum state;
     private String title;
-
+    @Formula("(select count(c.id) from comment as c where c.event_id = id)")
+    private Long comments;
 }

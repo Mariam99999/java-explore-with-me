@@ -1,5 +1,6 @@
 package com.example.mainservice.controller;
 
+import com.example.mainservice.model.CommentDto;
 import com.example.mainservice.model.EventFullDto;
 import com.example.mainservice.service.EventService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,12 @@ public class EventController {
                                        @RequestParam(defaultValue = "10") int size,
                                        HttpServletRequest httpServletRequest) {
         return eventService.getEventsByFilter(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, httpServletRequest);
+    }
+
+    @GetMapping("/{eventId}/comments")
+    public List<CommentDto> getCommentsByEventId(@PathVariable Long eventId, @RequestParam(defaultValue = "0") int from,
+                                                 @RequestParam(defaultValue = "10") int size) {
+        return eventService.getCommentsByEventId(eventId, from, size);
     }
 }
 
